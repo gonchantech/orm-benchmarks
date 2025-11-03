@@ -1,8 +1,9 @@
 {
   "name": "script",
+  "type": "module",
   "license": "MIT",
   "scripts": {
-    "start": "NODE_OPTIONS='--max-old-space-size=4096' ts-node ./src/main.ts",
+    "start": "NODE_OPTIONS='--max-old-space-size=4096 --loader=ts-node/esm' ts-node ./src/main.ts",
     "prisma:gen:pg": "prisma generate --schema prisma-pg/schema.prisma",
     "prisma:dbpush:pg": "prisma db push --config ./prisma-pg/prisma.config.ts",
     "prisma:gen:mysql": "prisma generate --schema prisma-mysql/schema.prisma",

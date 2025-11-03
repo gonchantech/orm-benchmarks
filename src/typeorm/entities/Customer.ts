@@ -1,7 +1,7 @@
 // src/entity/Customer.ts
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
-import { Order } from "./Order";
-import { Address } from "./Address";
+import type { Order } from "./Order";
+import type { Address } from "./Address";
 
 @Entity("Customer")
 export class Customer {
@@ -27,9 +27,9 @@ export class Customer {
   @Column({ name: "isActive", default: false })
   isActive: boolean;
 
-  @OneToMany(() => Order, (order) => order.customer)
+  @OneToMany("Order", "customer")
   orders: Order[];
 
-  @OneToMany(() => Address, (address) => address.customer)
+  @OneToMany("Address", "customer")
   addresses: Address[];
 }
