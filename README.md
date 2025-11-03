@@ -4,7 +4,7 @@
   <h1>ORM Benchmarks</h1>
 </div>
 
-This repo contains the app that was used to collect the data for [ORM benchmarks](https://benchmarks.prisma.io). 
+This repo contains the app that was used to collect the data for [ORM benchmarks](https://benchmarks.prisma.io).
 
 You can learn more about the benchmark methodology and results in this blog post: [Performance Benchmarks: Comparing Query Latency across TypeScript ORMs & Databases](https://www.prisma.io/blog/performance-benchmarks-comparing-query-latency-across-typescript-orms-and-databases).
 
@@ -71,7 +71,7 @@ npx prisma db push --schema ./prisma-pg/schema.prisma
 > **Note for PostgreSQL**: Since the data preparation/seeding relies on `pg_dump` and `pg_restore`, the PostgreSQL versions of the machine that's executing the script must match the version of the target PostgreSQL server.
 
 ```
-sh ./benchmark.sh -i 500 -s 1000 
+sh ./benchmark.sh -i 500 -s 1000
 ```
 
 This executes the benchmark scripts with 500 iterations and a sample size of 1000 records per table. See below for the different options you can provide to any benchmark runs.

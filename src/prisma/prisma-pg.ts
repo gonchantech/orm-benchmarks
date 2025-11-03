@@ -1,14 +1,31 @@
-import { PrismaClient } from "./client-pg";
+import { PrismaClient } from "./client-pg/client";
 import measure from "../lib/measure";
 import { QueryResult } from "../lib/types";
+import { env } from "prisma/config";
+import { PrismaPg } from "@prisma/adapter-pg";
+
+type Env = {
+  DATABASE_URL: string;
+};
+
+let prismaClientInstance: PrismaClient | null = null;
+
+export const getPrismaClient = () => {
+  if (!prismaClientInstance) {
+    const adapter = new PrismaPg({
+      connectionString: env<Env>("DATABASE_URL"),
+    });
+    prismaClientInstance = new PrismaClient({ adapter });
+  }
+  return prismaClientInstance;
+};
 
 export async function prismaPg(databaseUrl: string): Promise<QueryResult[]> {
   console.log(`Run prisma benchmarks: `, databaseUrl);
 
-  const prisma = new PrismaClient({
-    datasourceUrl: databaseUrl,
-  });
+  const prisma = getPrismaClient();
 
+  // Ensure connection is established (this is idempotent)
   await prisma.$connect();
 
   const results: QueryResult[] = [];

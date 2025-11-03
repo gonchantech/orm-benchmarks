@@ -1,7 +1,7 @@
-import { preparePg } from "./lib/prepare-pg-native"; // seed via `pg_restore`
-// import { preparePg } from "./lib/prepare-pg-prisma"; // seed via `createMany`
+// import { preparePg } from "./lib/prepare-pg-native"; // seed via `pg_restore`
+import { preparePg } from "./lib/prepare-pg-prisma"; // seed via `createMany`
 import writeResults from "./lib/write-results";
-import { BenchmarkOptions, MultipleBenchmarkRunResults,} from "./lib/types";
+import { BenchmarkOptions, MultipleBenchmarkRunResults } from "./lib/types";
 import { prismaPg } from "./prisma/prisma-pg";
 import { typeormPg } from "./typeorm/typeorm-pg";
 import { drizzlePg } from "./drizzle/drizzle-pg";
@@ -20,7 +20,13 @@ export default async function runBenchmarksPg(
     const results = await prismaPg(databaseUrl);
     prismaResults.push(results);
   }
-  writeResults("prisma", "postgresql", prismaResults, benchmarkOptions, resultsDirectoryTimestamp);
+  writeResults(
+    "prisma",
+    "postgresql",
+    prismaResults,
+    benchmarkOptions,
+    resultsDirectoryTimestamp
+  );
 
   const drizzleResults: MultipleBenchmarkRunResults = [];
   for (let i = 0; i < iterations; i++) {
@@ -28,7 +34,13 @@ export default async function runBenchmarksPg(
     const results = await drizzlePg(databaseUrl);
     drizzleResults.push(results);
   }
-  writeResults("drizzle", "postgresql", drizzleResults, benchmarkOptions, resultsDirectoryTimestamp);
+  writeResults(
+    "drizzle",
+    "postgresql",
+    drizzleResults,
+    benchmarkOptions,
+    resultsDirectoryTimestamp
+  );
 
   const typeormResults: MultipleBenchmarkRunResults = [];
   for (let i = 0; i < iterations; i++) {
@@ -36,16 +48,20 @@ export default async function runBenchmarksPg(
     const results = await typeormPg(databaseUrl);
     typeormResults.push(results);
   }
-  writeResults("typeorm", "postgresql", typeormResults, benchmarkOptions, resultsDirectoryTimestamp);
+  writeResults(
+    "typeorm",
+    "postgresql",
+    typeormResults,
+    benchmarkOptions,
+    resultsDirectoryTimestamp
+  );
 
   // Optionally compare results
-  if (process.env.DEBUG === 'benchmarks:compare-results') {
+  if (process.env.DEBUG === "benchmarks:compare-results") {
     compareResults({
       prismaResults,
       drizzleResults,
-      typeormResults
+      typeormResults,
     });
-
   }
-
 }

@@ -21,6 +21,9 @@ export class Address {
   @Column()
   country: string;
 
-  @ManyToOne(() => Customer, (customer) => customer.addresses, { onDelete: "CASCADE", onUpdate: "CASCADE" })
+  @ManyToOne(() => Customer, (customer) => customer.addresses, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   customer: Customer;
 }

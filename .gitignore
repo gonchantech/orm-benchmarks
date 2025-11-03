@@ -9,3 +9,5 @@ src/prisma/client-mysql
 src/prisma/client-postgresql
 backup
 */migrations
+src/prisma/client-pg
+src/prisma/client-mysql
