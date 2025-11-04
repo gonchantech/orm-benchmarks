@@ -1,7 +1,14 @@
 // src/entity/Order.ts
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, ManyToMany, JoinTable } from "typeorm";
-import { Customer } from "./Customer";
-import { Product } from "./Product";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  ManyToMany,
+  JoinTable,
+} from "typeorm";
+import type { Customer } from "./Customer";
+import type { Product } from "./Product";
 
 @Entity("Order")
 export class Order {
@@ -17,10 +24,13 @@ export class Order {
   @Column({ name: "totalAmount", type: "decimal" })
   totalAmount: number;
 
-  @ManyToOne(() => Customer, (customer) => customer.orders, { onDelete: "CASCADE", onUpdate: "CASCADE" })
+  @ManyToOne("Customer", "orders", {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   customer: Customer;
 
-  @ManyToMany(() => Product)
+  @ManyToMany("Product")
   @JoinTable({
     name: "_OrderProducts",
     joinColumn: { name: "A", referencedColumnName: "id" },

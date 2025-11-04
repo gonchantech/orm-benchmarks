@@ -4,7 +4,7 @@
   <h1>ORM Benchmarks</h1>
 </div>
 
-This repo contains the app that was used to collect the data for [ORM benchmarks](https://benchmarks.prisma.io). 
+This repo contains the app that was used to collect the data for [ORM benchmarks](https://benchmarks.prisma.io).
 
 You can learn more about the benchmark methodology and results in this blog post: [Performance Benchmarks: Comparing Query Latency across TypeScript ORMs & Databases](https://www.prisma.io/blog/performance-benchmarks-comparing-query-latency-across-typescript-orms-and-databases).
 
@@ -64,6 +64,52 @@ If you use PostgreSQL, run:
 npx prisma db push --schema ./prisma-pg/schema.prisma
 ```
 
+#### PostgreSQL native dependencies (pg-native)
+
+This project uses `pg-native` for high-performance native bindings to PostgreSQL via `libpq`. This requires additional setup:
+
+**Requirements:**
+
+- Your local PostgreSQL version must match your target PostgreSQL server version (for `pg_dump`/`pg_restore` compatibility)
+- PostgreSQL client libraries and tools must be installed locally
+
+**macOS setup:**
+
+```bash
+# Install libpq (required for pg-native)
+brew install libpq
+
+# Install full PostgreSQL (includes pg_dump/pg_restore)
+brew install postgresql
+
+# Verify pg_config is in your PATH
+pg_config --version
+```
+
+**Alternative: Simpler Setup (No native dependencies)**
+
+If you prefer to avoid native dependencies or encounter build issues, you can use the Prisma-based seeder instead:
+
+1. **Remove pg-native dependency:**
+
+   ```bash
+   npm uninstall pg-native
+   ```
+
+2. **Update package.json start script** - remove `NODE_PG_FORCE_NATIVE=true` from the start command
+
+3. **Switch to Prisma seeder** in `src/run-benchmarks-pg.ts`:
+
+   ```typescript
+   // Comment out the native seeder
+   // import { preparePg } from "./lib/prepare-pg-native"; // seed via `pg_restore`
+
+   // Uncomment the Prisma seeder
+   import { preparePg } from "./lib/prepare-pg-prisma"; // seed via `createMany`
+   ```
+
+> **Note**: The native approach (`pg-native` + `pg_restore`) is faster for large datasets, while the Prisma approach is simpler to set up but slower for seeding.
+
 > **Note**: We may add more databases in the future.
 
 ### 4. Run the benchmarks
@@ -71,7 +117,7 @@ npx prisma db push --schema ./prisma-pg/schema.prisma
 > **Note for PostgreSQL**: Since the data preparation/seeding relies on `pg_dump` and `pg_restore`, the PostgreSQL versions of the machine that's executing the script must match the version of the target PostgreSQL server.
 
 ```
-sh ./benchmark.sh -i 500 -s 1000 
+sh ./benchmark.sh -i 500 -s 1000
 ```
 
 This executes the benchmark scripts with 500 iterations and a sample size of 1000 records per table. See below for the different options you can provide to any benchmark runs.
@@ -84,6 +130,16 @@ results/postgresql-1000-500-1721027353940
 ├── prisma.csv
 └── typeorm.csv
 ```
+
+### 5. Generate website output (optional)
+
+To generate JSON output for website visualization from your benchmark results, run:
+
+```bash
+npm run website:output results/postgresql-1000-500-1721027353940
+```
+
+Replace `results/postgresql-1000-500-1721027353940` with your actual results directory path. This will output a JSON structure that can be used for result visualization.
 
 ## Usage
 

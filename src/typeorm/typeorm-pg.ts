@@ -3,7 +3,7 @@ import { Customer } from "./entities/Customer";
 import { Order } from "./entities/Order";
 import { Address } from "./entities/Address";
 import { Product } from "./entities/Product";
-import measure from "../lib/measure";
+import safeMeasure from "../lib/measure";
 import { QueryResult } from "../lib/types";
 
 export async function typeormPg(databaseUrl: string): Promise<QueryResult[]> {
@@ -24,84 +24,78 @@ export async function typeormPg(databaseUrl: string): Promise<QueryResult[]> {
   /**
    * findMany
    */
-  results.push(await measure("typeorm-findMany", AppDataSource.getRepository(Customer).find()));
+  const findManyResult = await safeMeasure("typeorm-findMany", AppDataSource.getRepository(Customer).find());
+  if (findManyResult) results.push(findManyResult);
 
-  results.push(
-    await measure(
-      "typeorm-findMany-filter-paginate-order",
-      AppDataSource.getRepository(Customer).find({
-        where: { isActive: true },
-        order: { createdAt: "DESC" },
-        skip: 0,
-        take: 10,
-      })
-    )
+  const filterPaginateResult = await safeMeasure(
+    "typeorm-findMany-filter-paginate-order",
+    AppDataSource.getRepository(Customer).find({
+      where: { isActive: true },
+      order: { createdAt: "DESC" },
+      skip: 0,
+      take: 10,
+    })
   );
+  if (filterPaginateResult) results.push(filterPaginateResult);
 
-  results.push(
-    await measure(
-      "typeorm-findMany-1-level-nesting",
-      AppDataSource.getRepository(Customer).find({ relations: ["orders"] })
-    )
+  const findManyNestingResult = await safeMeasure(
+    "typeorm-findMany-1-level-nesting",
+    AppDataSource.getRepository(Customer).find({ relations: ["orders"] })
   );
+  if (findManyNestingResult) results.push(findManyNestingResult);
 
   /**
    * findFirst
    */
 
-  results.push(
-    await measure(
-      // not using `findOne()` because of:
-      // Error: You must provide selection conditions in order to find a single row.
-      "typeorm-findFirst",
-      AppDataSource.getRepository(Customer).find({
-        take: 1
-      })
-    )
+  const findFirstResult = await safeMeasure(
+    // not using `findOne()` because of:
+    // Error: You must provide selection conditions in order to find a single row.
+    "typeorm-findFirst",
+    AppDataSource.getRepository(Customer).find({
+      take: 1
+    })
   );
+  if (findFirstResult) results.push(findFirstResult);
 
-  results.push(
-    await measure(
-      // not using `findOne({ relations: ["orders"] })` because of:
-      // Error: You must provide selection conditions in order to find a single row.
-      "typeorm-findFirst-1-level-nesting",
-      AppDataSource.getRepository(Customer).find({
-        take: 1,
-        relations: ["orders"],
-      })
-    )
+  const findFirstNestingResult = await safeMeasure(
+    // not using `findOne({ relations: ["orders"] })` because of:
+    // Error: You must provide selection conditions in order to find a single row.
+    "typeorm-findFirst-1-level-nesting",
+    AppDataSource.getRepository(Customer).find({
+      take: 1,
+      relations: ["orders"],
+    })
   );
+  if (findFirstNestingResult) results.push(findFirstNestingResult);
 
   /**
    * findUnique
    */
-  results.push(
-    await measure("typeorm-findUnique", AppDataSource.getRepository(Customer).findOne({ where: { id: 1 } }))
-  );
+  const findUniqueResult = await safeMeasure("typeorm-findUnique", AppDataSource.getRepository(Customer).findOne({ where: { id: 1 } }));
+  if (findUniqueResult) results.push(findUniqueResult);
 
-  results.push(
-    await measure(
-      "typeorm-findUnique-1-level-nesting",
-      AppDataSource.getRepository(Customer).findOne({
-        where: { id: 1 },
-        relations: ["orders"],
-      })
-    )
+  const findUniqueNestingResult = await safeMeasure(
+    "typeorm-findUnique-1-level-nesting",
+    AppDataSource.getRepository(Customer).findOne({
+      where: { id: 1 },
+      relations: ["orders"],
+    })
   );
+  if (findUniqueNestingResult) results.push(findUniqueNestingResult);
 
   /**
    * create
    */
-  results.push(
-    await measure(
-      "typeorm-create",
-      AppDataSource.getRepository(Customer).save({
-        name: "John Doe",
-        email: "john.doe@example.com",
-        isActive: false,
-      })
-    )
+  const createResult = await safeMeasure(
+    "typeorm-create",
+    AppDataSource.getRepository(Customer).save({
+      name: "John Doe",
+      email: "john.doe@example.com",
+      isActive: false,
+    })
   );
+  if (createResult) results.push(createResult);
 
   const nestedCreate = AppDataSource.transaction(async (transactionalEntityManager) => {
     // Insert customer
@@ -129,54 +123,52 @@ export async function typeormPg(databaseUrl: string): Promise<QueryResult[]> {
       ])
       .execute();
   });
-  results.push(await measure("typeorm-nested-create", nestedCreate));
+  const nestedCreateResult = await safeMeasure("typeorm-nested-create", nestedCreate);
+  if (nestedCreateResult) results.push(nestedCreateResult);
 
   /**
    * update
    */
-  results.push(
-    await measure(
-      "typeorm-update",
-      AppDataSource
-        .getRepository(Customer)
-        .update(
-          { id: 1 }, 
-          { name: "John Doe Updated" }
-        )
-    )
+  const updateResult = await safeMeasure(
+    "typeorm-update",
+    AppDataSource
+      .getRepository(Customer)
+      .update(
+        { id: 1 }, 
+        { name: "John Doe Updated" }
+      )
   );
+  if (updateResult) results.push(updateResult);
 
-  results.push(
-    await measure(
-      "typeorm-nested-update",
-      AppDataSource.transaction(async (transactionalEntityManager) => {
-        // Update customer name
-        await transactionalEntityManager
-          .update(Customer, { id: 1 }, { name: "John Doe Updated" });
+  const nestedUpdateResult = await safeMeasure(
+    "typeorm-nested-update",
+    AppDataSource.transaction(async (transactionalEntityManager) => {
+      // Update customer name
+      await transactionalEntityManager
+        .update(Customer, { id: 1 }, { name: "John Doe Updated" });
 
-        // Update address
-        await transactionalEntityManager
-          .update(Address, { customer: { id: 1 } }, { street: "456 New St" });
-      })
-    )
+      // Update address
+      await transactionalEntityManager
+        .update(Address, { customer: { id: 1 } }, { street: "456 New St" });
+    })
   );
+  if (nestedUpdateResult) results.push(nestedUpdateResult);
 
   /**
    * upsert
    */
-  results.push(
-    await measure(
-      "typeorm-upsert",
-      AppDataSource
-        .getRepository(Customer)
-        .save({
-          id: 1,
-          name: "John Doe Upserted",
-          email: "john.doe@example.com",
-          isActive: false,
-      })
-    )
+  const upsertResult = await safeMeasure(
+    "typeorm-upsert",
+    AppDataSource
+      .getRepository(Customer)
+      .save({
+        id: 1,
+        name: "John Doe Upserted",
+        email: "john.doe@example.com",
+        isActive: false,
+    })
   );
+  if (upsertResult) results.push(upsertResult);
 
   // Nested upsert operation using transaction
   const nestedUpsert = AppDataSource.transaction(async (transactionalEntityManager) => {
@@ -198,15 +190,17 @@ export async function typeormPg(databaseUrl: string): Promise<QueryResult[]> {
       country: "Country",
     });
   });
-  results.push(await measure("typeorm-nested-upsert", nestedUpsert));
+  const nestedUpsertResult = await safeMeasure("typeorm-nested-upsert", nestedUpsert);
+  if (nestedUpsertResult) results.push(nestedUpsertResult);
 
   /**
    * delete
    */
-  results.push(await measure(
+  const deleteResult = await safeMeasure(
     "typeorm-delete", 
-    AppDataSource.getRepository(Customer).delete({ id: 1 }))
+    AppDataSource.getRepository(Customer).delete({ id: 1 })
   );
+  if (deleteResult) results.push(deleteResult);
 
   await AppDataSource.destroy();
 

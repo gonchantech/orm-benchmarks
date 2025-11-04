@@ -1,7 +1,7 @@
 import { preparePg } from "./lib/prepare-pg-native"; // seed via `pg_restore`
 // import { preparePg } from "./lib/prepare-pg-prisma"; // seed via `createMany`
 import writeResults from "./lib/write-results";
-import { BenchmarkOptions, MultipleBenchmarkRunResults,} from "./lib/types";
+import { BenchmarkOptions, MultipleBenchmarkRunResults } from "./lib/types";
 import { prismaPg } from "./prisma/prisma-pg";
 import { typeormPg } from "./typeorm/typeorm-pg";
 import { drizzlePg } from "./drizzle/drizzle-pg";
@@ -16,36 +16,77 @@ export default async function runBenchmarksPg(
 
   const prismaResults: MultipleBenchmarkRunResults = [];
   for (let i = 0; i < iterations; i++) {
-    await preparePg({ databaseUrl, size, fakerSeed });
-    const results = await prismaPg(databaseUrl);
-    prismaResults.push(results);
+    try {
+      await preparePg({ databaseUrl, size, fakerSeed });
+      const results = await prismaPg(databaseUrl);
+      prismaResults.push(results);
+    } catch (error) {
+      console.error(`❌ Prisma iteration ${i + 1} failed:`, error);
+      console.error(
+        `❌ Stack:`,
+        error instanceof Error ? error.stack : "No stack trace"
+      );
+      // Continue with next iteration
+    }
   }
-  writeResults("prisma", "postgresql", prismaResults, benchmarkOptions, resultsDirectoryTimestamp);
+  writeResults(
+    "prisma",
+    "postgresql",
+    prismaResults,
+    benchmarkOptions,
+    resultsDirectoryTimestamp
+  );
 
   const drizzleResults: MultipleBenchmarkRunResults = [];
   for (let i = 0; i < iterations; i++) {
-    await preparePg({ databaseUrl, size, fakerSeed });
-    const results = await drizzlePg(databaseUrl);
-    drizzleResults.push(results);
+    try {
+      await preparePg({ databaseUrl, size, fakerSeed });
+      const results = await drizzlePg(databaseUrl);
+      drizzleResults.push(results);
+    } catch (error) {
+      console.error(
+        `❌ Drizzle iteration ${i + 1} failed:`,
+        (error as Error).message
+      );
+      // Continue with next iteration
+    }
   }
-  writeResults("drizzle", "postgresql", drizzleResults, benchmarkOptions, resultsDirectoryTimestamp);
+  writeResults(
+    "drizzle",
+    "postgresql",
+    drizzleResults,
+    benchmarkOptions,
+    resultsDirectoryTimestamp
+  );
 
   const typeormResults: MultipleBenchmarkRunResults = [];
   for (let i = 0; i < iterations; i++) {
-    await preparePg({ databaseUrl, size, fakerSeed });
-    const results = await typeormPg(databaseUrl);
-    typeormResults.push(results);
+    try {
+      await preparePg({ databaseUrl, size, fakerSeed });
+      const results = await typeormPg(databaseUrl);
+      typeormResults.push(results);
+    } catch (error) {
+      console.error(
+        `❌ TypeORM iteration ${i + 1} failed:`,
+        (error as Error).message
+      );
+      // Continue with next iteration
+    }
   }
-  writeResults("typeorm", "postgresql", typeormResults, benchmarkOptions, resultsDirectoryTimestamp);
+  writeResults(
+    "typeorm",
+    "postgresql",
+    typeormResults,
+    benchmarkOptions,
+    resultsDirectoryTimestamp
+  );
 
   // Optionally compare results
-  if (process.env.DEBUG === 'benchmarks:compare-results') {
+  if (process.env.DEBUG === "benchmarks:compare-results") {
     compareResults({
       prismaResults,
       drizzleResults,
-      typeormResults
+      typeormResults,
     });
-
   }
-
 }

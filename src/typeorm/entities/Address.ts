@@ -2,7 +2,7 @@
 import "reflect-metadata";
 
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
-import { Customer } from "./Customer";
+import type { Customer } from "./Customer";
 
 @Entity("Address")
 export class Address {
@@ -21,6 +21,9 @@ export class Address {
   @Column()
   country: string;
 
-  @ManyToOne(() => Customer, (customer) => customer.addresses, { onDelete: "CASCADE", onUpdate: "CASCADE" })
+  @ManyToOne("Customer", "addresses", {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   customer: Customer;
 }
