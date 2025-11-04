@@ -17,6 +17,20 @@ async function main() {
   }
   const databaseUrl = process.env.DATABASE_URL
 
+  // Test safeMeasure function first
+  console.log('🧪 Testing safeMeasure function...');
+  const safeMeasure = (await import('./lib/measure')).default;
+  
+  // Test successful query
+  const successResult = await safeMeasure('test-success', Promise.resolve('test data'));
+  console.log('✅ Success test result:', successResult);
+  
+  // Test failed query
+  const failResult = await safeMeasure('test-failure', Promise.reject(new Error('Test error')));
+  console.log('✅ Failure test result:', failResult);
+  
+  console.log('🧪 safeMeasure tests completed, proceeding with benchmarks...\n');
+
   const database = extractDatabase(databaseUrl);
 
   if (database === "postgresql") {
@@ -32,4 +46,23 @@ async function main() {
   }
 }
 
-main();
+// Add global unhandled rejection handler
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Unhandled Promise Rejection at:', promise);
+  console.error('❌ Reason:', reason);
+  console.error('❌ Stack:', reason instanceof Error ? reason.stack : 'No stack trace available');
+  process.exit(1);
+});
+
+// Add global uncaught exception handler
+process.on('uncaughtException', (error) => {
+  console.error('❌ Uncaught Exception:', error);
+  console.error('❌ Stack:', error.stack);
+  process.exit(1);
+});
+
+main().catch((error) => {
+  console.error('❌ Benchmark failed:', error);
+  console.error('❌ Stack:', error.stack);
+  process.exit(1);
+});

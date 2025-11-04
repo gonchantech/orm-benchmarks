@@ -16,9 +16,15 @@ export default async function runBenchmarksPg(
 
   const prismaResults: MultipleBenchmarkRunResults = [];
   for (let i = 0; i < iterations; i++) {
-    await preparePg({ databaseUrl, size, fakerSeed });
-    const results = await prismaPg(databaseUrl);
-    prismaResults.push(results);
+    try {
+      await preparePg({ databaseUrl, size, fakerSeed });
+      const results = await prismaPg(databaseUrl);
+      prismaResults.push(results);
+    } catch (error) {
+      console.error(`❌ Prisma iteration ${i + 1} failed:`, error);
+      console.error(`❌ Stack:`, error instanceof Error ? error.stack : 'No stack trace');
+      // Continue with next iteration
+    }
   }
   writeResults(
     "prisma",
@@ -30,9 +36,14 @@ export default async function runBenchmarksPg(
 
   const drizzleResults: MultipleBenchmarkRunResults = [];
   for (let i = 0; i < iterations; i++) {
-    await preparePg({ databaseUrl, size, fakerSeed });
-    const results = await drizzlePg(databaseUrl);
-    drizzleResults.push(results);
+    try {
+      await preparePg({ databaseUrl, size, fakerSeed });
+      const results = await drizzlePg(databaseUrl);
+      drizzleResults.push(results);
+    } catch (error) {
+      console.error(`❌ Drizzle iteration ${i + 1} failed:`, (error as Error).message);
+      // Continue with next iteration
+    }
   }
   writeResults(
     "drizzle",
@@ -44,9 +55,14 @@ export default async function runBenchmarksPg(
 
   const typeormResults: MultipleBenchmarkRunResults = [];
   for (let i = 0; i < iterations; i++) {
-    await preparePg({ databaseUrl, size, fakerSeed });
-    const results = await typeormPg(databaseUrl);
-    typeormResults.push(results);
+    try {
+      await preparePg({ databaseUrl, size, fakerSeed });
+      const results = await typeormPg(databaseUrl);
+      typeormResults.push(results);
+    } catch (error) {
+      console.error(`❌ TypeORM iteration ${i + 1} failed:`, (error as Error).message);
+      // Continue with next iteration
+    }
   }
   writeResults(
     "typeorm",

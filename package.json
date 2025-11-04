@@ -8,7 +8,7 @@
     "prisma:dbpush:pg": "prisma db push --config ./prisma-pg/prisma.config.ts",
     "prisma:gen:mysql": "prisma generate --schema prisma-mysql/schema.prisma",
     "prisma:gen:all": "npm run prisma:gen:pg && npm run prisma:gen:mysql",
-    "website:output": "npx ts-node ./src/lib/website-output --results-directory"
+    "website:output": "tsx ./src/lib/website-output.ts --results-directory"
   },
   "dependencies": {
     "@prisma/adapter-pg": "6.18.0-integration-next.11",
@@ -26,8 +26,10 @@
     "@faker-js/faker": "^8.4.1",
     "@types/faker": "^6.6.9",
     "drizzle-kit": "^0.22.7",
+    "pg-types": "^4.1.0",
     "prisma": "6.18.0-integration-next.11",
     "ts-node": "10.9.2",
+    "tsx": "^4.20.6",
     "typescript": "5.5.2"
   }
 }

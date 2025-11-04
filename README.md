@@ -85,6 +85,16 @@ results/postgresql-1000-500-1721027353940
 └── typeorm.csv
 ```
 
+### 5. Generate website output (optional)
+
+To generate JSON output for website visualization from your benchmark results, run:
+
+```bash
+npm run website:output results/postgresql-1000-500-1721027353940
+```
+
+Replace `results/postgresql-1000-500-1721027353940` with your actual results directory path. This will output a JSON structure that can be used for result visualization.
+
 ## Usage
 
 ### Executing the benchmarks

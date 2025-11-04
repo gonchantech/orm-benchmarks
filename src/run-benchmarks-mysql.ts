@@ -14,17 +14,27 @@ export default async function runBenchmarksMySQL(
 
   const prismaResults: MultipleBenchmarkRunResults = [];
   for (let i = 0; i < iterations; i++) {
-    await prepareMySQL({ databaseUrl, size, fakerSeed });
-    const results = await prismaMySQL(databaseUrl);
-    prismaResults.push(results);
+    try {
+      await prepareMySQL({ databaseUrl, size, fakerSeed });
+      const results = await prismaMySQL(databaseUrl);
+      prismaResults.push(results);
+    } catch (error) {
+      console.error(`❌ Prisma iteration ${i + 1} failed:`, (error as Error).message);
+      // Continue with next iteration
+    }
   }
   writeResults("prisma", "mysql", prismaResults, benchmarkOptions, resultsDirectoryTimestamp);
 
   const drizzleResults: MultipleBenchmarkRunResults = [];
   for (let i = 0; i < iterations; i++) {
-    await prepareMySQL({ databaseUrl, size, fakerSeed });
-    const results = await drizzleMySQL(databaseUrl);
-    drizzleResults.push(results);
+    try {
+      await prepareMySQL({ databaseUrl, size, fakerSeed });
+      const results = await drizzleMySQL(databaseUrl);
+      drizzleResults.push(results);
+    } catch (error) {
+      console.error(`❌ Drizzle iteration ${i + 1} failed:`, (error as Error).message);
+      // Continue with next iteration
+    }
   }
   writeResults("drizzle", "mysql", drizzleResults, benchmarkOptions, resultsDirectoryTimestamp);
 
