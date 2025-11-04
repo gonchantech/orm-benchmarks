@@ -64,6 +64,52 @@ If you use PostgreSQL, run:
 npx prisma db push --schema ./prisma-pg/schema.prisma
 ```
 
+#### PostgreSQL native dependencies (pg-native)
+
+This project uses `pg-native` for high-performance native bindings to PostgreSQL via `libpq`. This requires additional setup:
+
+**Requirements:**
+
+- Your local PostgreSQL version must match your target PostgreSQL server version (for `pg_dump`/`pg_restore` compatibility)
+- PostgreSQL client libraries and tools must be installed locally
+
+**macOS setup:**
+
+```bash
+# Install libpq (required for pg-native)
+brew install libpq
+
+# Install full PostgreSQL (includes pg_dump/pg_restore)
+brew install postgresql
+
+# Verify pg_config is in your PATH
+pg_config --version
+```
+
+**Alternative: Simpler Setup (No native dependencies)**
+
+If you prefer to avoid native dependencies or encounter build issues, you can use the Prisma-based seeder instead:
+
+1. **Remove pg-native dependency:**
+
+   ```bash
+   npm uninstall pg-native
+   ```
+
+2. **Update package.json start script** - remove `NODE_PG_FORCE_NATIVE=true` from the start command
+
+3. **Switch to Prisma seeder** in `src/run-benchmarks-pg.ts`:
+
+   ```typescript
+   // Comment out the native seeder
+   // import { preparePg } from "./lib/prepare-pg-native"; // seed via `pg_restore`
+
+   // Uncomment the Prisma seeder
+   import { preparePg } from "./lib/prepare-pg-prisma"; // seed via `createMany`
+   ```
+
+> **Note**: The native approach (`pg-native` + `pg_restore`) is faster for large datasets, while the Prisma approach is simpler to set up but slower for seeding.
+
 > **Note**: We may add more databases in the future.
 
 ### 4. Run the benchmarks

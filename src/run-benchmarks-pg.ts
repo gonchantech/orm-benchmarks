@@ -1,5 +1,5 @@
-// import { preparePg } from "./lib/prepare-pg-native"; // seed via `pg_restore`
-import { preparePg } from "./lib/prepare-pg-prisma"; // seed via `createMany`
+import { preparePg } from "./lib/prepare-pg-native"; // seed via `pg_restore`
+// import { preparePg } from "./lib/prepare-pg-prisma"; // seed via `createMany`
 import writeResults from "./lib/write-results";
 import { BenchmarkOptions, MultipleBenchmarkRunResults } from "./lib/types";
 import { prismaPg } from "./prisma/prisma-pg";
@@ -22,7 +22,10 @@ export default async function runBenchmarksPg(
       prismaResults.push(results);
     } catch (error) {
       console.error(`❌ Prisma iteration ${i + 1} failed:`, error);
-      console.error(`❌ Stack:`, error instanceof Error ? error.stack : 'No stack trace');
+      console.error(
+        `❌ Stack:`,
+        error instanceof Error ? error.stack : "No stack trace"
+      );
       // Continue with next iteration
     }
   }
@@ -41,7 +44,10 @@ export default async function runBenchmarksPg(
       const results = await drizzlePg(databaseUrl);
       drizzleResults.push(results);
     } catch (error) {
-      console.error(`❌ Drizzle iteration ${i + 1} failed:`, (error as Error).message);
+      console.error(
+        `❌ Drizzle iteration ${i + 1} failed:`,
+        (error as Error).message
+      );
       // Continue with next iteration
     }
   }
@@ -60,7 +66,10 @@ export default async function runBenchmarksPg(
       const results = await typeormPg(databaseUrl);
       typeormResults.push(results);
     } catch (error) {
-      console.error(`❌ TypeORM iteration ${i + 1} failed:`, (error as Error).message);
+      console.error(
+        `❌ TypeORM iteration ${i + 1} failed:`,
+        (error as Error).message
+      );
       // Continue with next iteration
     }
   }
