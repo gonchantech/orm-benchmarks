@@ -142,7 +142,7 @@ export async function preparePg(options: {
 
   const input = transformArrayToString(values);
   await prisma.$queryRawUnsafe(
-    `INSERT INTO "_OrderProducts" ("A", "B") VALUES ${input} ON CONFLICT ("A", "B") DO NOTHING`
+    `INSERT INTO "_OrderProducts" ("A", "B") VALUES ${input}`
   );
 
   const ordersCount: any = await prisma.$queryRaw`SELECT COUNT(*) FROM "Order"`;

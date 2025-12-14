@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ORM Benchmark Results</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, sans-serif;
+        background-color: #0a0b16;
+        color: #a0aec0;
+        min-height: 100vh;
+      }
+
+      .header-wrapper {
+        background: linear-gradient(180deg, #0b1a1e, #0a0b16);
+        padding: 60px 20px 40px;
+        text-align: center;
+      }
+
+      .header-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 1200px;
+        margin: 0 auto 40px;
+        padding: 0 20px;
+      }
+
+      .logo {
+        font-size: 24px;
+        font-weight: 700;
+        color: #71e8df;
+        text-decoration: none;
+      }
+
+      h1 {
+        font-family: "Barlow", sans-serif;
+        font-size: 48px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 20px;
+      }
+
+      .subtitle {
+        font-size: 18px;
+        max-width: 700px;
+        margin: 0 auto 30px;
+        line-height: 1.6;
+      }
+
+      .content-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 20px;
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-bottom: 30px;
+        align-items: center;
+      }
+
+      .file-input-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .file-input-wrapper label {
+        color: #fff;
+        font-weight: 600;
+      }
+
+      input[type="file"] {
+        background: #1a202c;
+        border: 1px solid #2d3748;
+        border-radius: 8px;
+        padding: 10px 15px;
+        color: #a0aec0;
+        cursor: pointer;
+      }
+
+      input[type="file"]::-webkit-file-upload-button {
+        background: #2d3748;
+        border: none;
+        border-radius: 4px;
+        padding: 8px 16px;
+        color: #fff;
+        cursor: pointer;
+        margin-right: 10px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 1px;
+        font-size: 14px;
+      }
+
+      thead th {
+        background-color: #2d3748;
+        color: #fff;
+        padding: 16px;
+        font-weight: 700;
+        font-size: 16px;
+      }
+
+      thead th.prisma {
+        color: #71e8df;
+        border-top-left-radius: 8px;
+      }
+
+      thead th.drizzle {
+        color: #5f9be5;
+      }
+
+      thead th.typeorm {
+        color: #8580c5;
+      }
+
+      thead th.kysely {
+        color: #f59e0b;
+        border-top-right-radius: 8px;
+      }
+
+      thead th.empty {
+        background: transparent;
+        width: 200px;
+      }
+
+      tbody th {
+        background-color: #2d3748;
+        color: #e2e8f0;
+        padding: 12px 16px;
+        text-align: left;
+        font-weight: 700;
+      }
+
+      tbody td {
+        background-color: #1a202c;
+        color: #a0aec0;
+        padding: 12px 16px;
+        text-align: center;
+        font-family: "JetBrains Mono", monospace;
+      }
+
+      tbody tr:first-of-type th {
+        border-top-left-radius: 8px;
+      }
+
+      tbody tr:last-of-type th {
+        border-bottom-left-radius: 8px;
+      }
+
+      tbody tr:last-of-type td:last-child {
+        border-bottom-right-radius: 8px;
+      }
+
+      .parent-row {
+        cursor: pointer;
+      }
+
+      .parent-row:hover td,
+      .parent-row:hover th {
+        background-color: #2d3748;
+      }
+
+      .parent-row.active td,
+      .parent-row.active th {
+        color: #fff;
+      }
+
+      .sub-rows {
+        display: none;
+      }
+
+      .sub-rows.visible {
+        display: table-row;
+      }
+
+      .sub-rows th {
+        background-color: #1a202c;
+        font-weight: 600;
+        font-size: 12px;
+      }
+
+      .sub-rows td {
+        font-size: 12px;
+      }
+
+      .code-cell {
+        text-align: left;
+        font-size: 11px;
+        line-height: 1.4;
+        white-space: pre-wrap;
+        word-break: break-word;
+        max-width: 250px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .code-cell:hover {
+        background-color: #2d3748;
+      }
+
+      .analysis {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        justify-content: center;
+      }
+
+      .analysis span {
+        font-size: 12px;
+      }
+
+      .analysis .prisma {
+        color: #71e8df;
+      }
+      .analysis .drizzle {
+        color: #5f9be5;
+      }
+      .analysis .typeorm {
+        color: #8580c5;
+      }
+      .analysis .kysely {
+        color: #f59e0b;
+      }
+
+      .tooltip {
+        cursor: help;
+        border-bottom: 1px dotted #a0aec0;
+      }
+
+      .winner {
+        background-color: rgba(22, 163, 148, 0.2) !important;
+        color: #71e8df !important;
+        font-weight: 700;
+      }
+
+      .info-box {
+        background: #1a202c;
+        border: 1px solid #2d3748;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 30px;
+      }
+
+      .info-box p {
+        line-height: 1.6;
+      }
+
+      .btn-link {
+        color: #71e8df;
+        text-decoration: underline;
+        cursor: pointer;
+        transition: color 0.15s ease;
+      }
+
+      .btn-link:hover {
+        color: #16a394;
+      }
+
+      @media (max-width: 768px) {
+        h1 {
+          font-size: 32px;
+        }
+
+        table {
+          font-size: 12px;
+        }
+
+        thead th,
+        tbody th,
+        tbody td {
+          padding: 8px;
+        }
+
+        .code-cell {
+          font-size: 10px;
+          max-width: 150px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header-wrapper">
+      <nav class="header-nav">
+        <a href="#" class="logo">ORM Benchmarks</a>
+        <a
+          href="https://github.com/prisma/orm-benchmarks"
+          target="_blank"
+          class="btn-link"
+          >GitHub</a
+        >
+      </nav>
+      <h1>ORM Benchmark Results</h1>
+      <p class="subtitle">
+        Compare query latency between Prisma ORM, Drizzle, TypeORM, and Kysely.
+        The table below shows the <strong>median values</strong> of benchmark
+        iterations.
+      </p>
+    </div>
+
+    <main class="content-wrapper">
+      <div class="controls">
+        <div class="file-input-wrapper">
+          <label for="jsonFile">Load JSON Data:</label>
+          <input type="file" id="jsonFile" accept=".json" />
+        </div>
+      </div>
+
+      <div class="info-box" id="loadingMessage">
+        <p>
+          Select a JSON file generated by <code>npm run website:output</code> to
+          view the benchmark results.
+        </p>
+      </div>
+
+      <div id="tableContainer" style="display: none">
+        <table id="benchmarkTable">
+          <thead>
+            <tr>
+              <th class="empty"></th>
+              <th class="prisma">Prisma ORM</th>
+              <th class="drizzle">Drizzle</th>
+              <th class="typeorm">TypeORM</th>
+              <th class="kysely">Kysely</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </main>
+
+    <script>
+      const queryLabels = {
+        findMany: "Find all",
+        "findMany-filter-paginate-order": "Filter, paginate & sort",
+        "findMany-1-level-nesting": "Nested find all",
+        findFirst: "Find first",
+        "findFirst-1-level-nesting": "Nested find first",
+        findUnique: "Find unique",
+        "findUnique-1-level-nesting": "Nested find unique",
+        create: "Create",
+        "nested-create": "Nested create",
+        update: "Update",
+        "nested-update": "Nested update",
+        upsert: "Upsert",
+        "nested-upsert": "Nested upsert",
+        delete: "Delete",
+      };
+
+      const queryDescriptions = {
+        findMany: "Return all records",
+        "findMany-filter-paginate-order":
+          "Return a filtered, sorted and paginated list of records",
+        "findMany-1-level-nesting": "Return all records with a relation",
+        findFirst: "Return the first record",
+        "findFirst-1-level-nesting": "Return the first record with a relation",
+        findUnique: "Return a record identified by its primary key",
+        "findUnique-1-level-nesting":
+          "Return a record with a relation by primary key",
+        create: "Create a new record",
+        "nested-create": "Create two related records in a single query",
+        update: "Update an existing record",
+        "nested-update": "Update two related records in a single query",
+        upsert: "Update an existing record or create if not exists",
+        "nested-upsert": "Nested upsert operation",
+        delete: "Delete an existing record",
+      };
+
+      function calculateMedian(arr) {
+        const sorted = [...arr].sort((a, b) => a - b);
+        const mid = Math.floor(sorted.length / 2);
+        return sorted.length % 2 !== 0
+          ? sorted[mid]
+          : (sorted[mid - 1] + sorted[mid]) / 2;
+      }
+
+      function calculateIQR(arr) {
+        const sorted = [...arr].sort((a, b) => a - b);
+        const q1 = sorted[Math.floor(sorted.length * 0.25)];
+        const q3 = sorted[Math.floor(sorted.length * 0.75)];
+        return q3 - q1;
+      }
+
+      function calculateStdDev(arr) {
+        const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
+        const squareDiffs = arr.map((value) => Math.pow(value - mean, 2));
+        return Math.sqrt(squareDiffs.reduce((a, b) => a + b, 0) / arr.length);
+      }
+
+      function formatMs(ms) {
+        if (ms === null || ms === undefined) return "N/A";
+        return ms.toFixed(2) + "ms";
+      }
+
+      function renderTable(data) {
+        const tableBody = document.getElementById("tableBody");
+        tableBody.innerHTML = "";
+
+        const orms = ["prisma", "drizzle", "typeorm", "kysely"];
+        const allQueries = new Set();
+
+        orms.forEach((orm) => {
+          if (data[orm] && data[orm].queries) {
+            Object.keys(data[orm].queries).forEach((q) => allQueries.add(q));
+          }
+        });
+
+        allQueries.forEach((queryKey) => {
+          const medians = {};
+          const iqrs = {};
+          const stdDevs = {};
+          const snippets = {};
+
+          orms.forEach((orm) => {
+            if (data[orm] && data[orm].queries && data[orm].queries[queryKey]) {
+              const results = data[orm].queries[queryKey].results;
+              medians[orm] = calculateMedian(results);
+              iqrs[orm] = calculateIQR(results);
+              stdDevs[orm] = calculateStdDev(results);
+              snippets[orm] = data[orm].queries[queryKey].code?.snippet || "";
+            }
+          });
+
+          // Find winner (lowest median)
+          let winner = null;
+          let minMedian = Infinity;
+          orms.forEach((orm) => {
+            if (medians[orm] !== undefined && medians[orm] < minMedian) {
+              minMedian = medians[orm];
+              winner = orm;
+            }
+          });
+
+          // Main row
+          const mainRow = document.createElement("tr");
+          mainRow.className = "parent-row";
+          mainRow.innerHTML = `
+          <th title="${queryDescriptions[queryKey] || ""}">${
+            queryLabels[queryKey] || queryKey
+          }</th>
+          ${orms
+            .map(
+              (orm) => `
+            <td class="${winner === orm ? "winner" : ""}">${formatMs(
+                medians[orm]
+              )}</td>
+          `
+            )
+            .join("")}
+        `;
+          mainRow.addEventListener("click", () => {
+            mainRow.classList.toggle("active");
+            const subRows = document.querySelectorAll(
+              `.sub-row-${queryKey.replace(/[^a-z0-9]/gi, "-")}`
+            );
+            subRows.forEach((row) => row.classList.toggle("visible"));
+          });
+          tableBody.appendChild(mainRow);
+
+          // Code row
+          const codeRow = document.createElement("tr");
+          codeRow.className = `sub-rows sub-row-${queryKey.replace(
+            /[^a-z0-9]/gi,
+            "-"
+          )}`;
+          codeRow.innerHTML = `
+          <th>Query</th>
+          ${orms
+            .map(
+              (orm) => `
+            <td class="code-cell" title="${snippets[orm] || "N/A"}">${
+                snippets[orm] ? snippets[orm].substring(0, 100) + "..." : "N/A"
+              }</td>
+          `
+            )
+            .join("")}
+        `;
+          tableBody.appendChild(codeRow);
+
+          // Analysis row
+          const analysisRow = document.createElement("tr");
+          analysisRow.className = `sub-rows sub-row-${queryKey.replace(
+            /[^a-z0-9]/gi,
+            "-"
+          )}`;
+          analysisRow.innerHTML = `
+          <th>Analysis</th>
+          ${orms
+            .map(
+              (orm) => `
+            <td>
+              <div class="analysis">
+                <span class="${orm}">IQR: ${formatMs(iqrs[orm])}</span>
+                <span class="${orm}">StdDev: ${formatMs(stdDevs[orm])}</span>
+              </div>
+            </td>
+          `
+            )
+            .join("")}
+        `;
+          tableBody.appendChild(analysisRow);
+        });
+
+        document.getElementById("loadingMessage").style.display = "none";
+        document.getElementById("tableContainer").style.display = "block";
+      }
+
+      document
+        .getElementById("jsonFile")
+        .addEventListener("change", (event) => {
+          const file = event.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              try {
+                const data = JSON.parse(e.target.result);
+                renderTable(data);
+              } catch (error) {
+                alert("Invalid JSON file: " + error.message);
+              }
+            };
+            reader.readAsText(file);
+          }
+        });
+    </script>
+  </body>
+</html>
