@@ -435,6 +435,18 @@
             }
           });
 
+          // Console output for debugging
+          console.log(`\n=== ${queryLabels[queryKey] || queryKey} ===`);
+          orms.forEach((orm) => {
+            if (medians[orm] !== undefined) {
+              console.log(
+                `${orm}: Median=${formatMs(medians[orm])}, IQR=${formatMs(
+                  iqrs[orm]
+                )}, StdDev=${formatMs(stdDevs[orm])}`
+              );
+            }
+          });
+
           // Find winner (lowest median)
           let winner = null;
           let minMedian = Infinity;
