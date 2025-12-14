@@ -65,6 +65,7 @@ export function compareResults(results: {
         drizzle: extractIds(drizzleResults[iterationIndex][queryIndex].data),
         typeorm: extractIds(typeormResults[iterationIndex][queryIndex].data),
         kysely: extractIds(kyselyResults[iterationIndex][queryIndex].data),
+        "kysely-additional": new Set<number>(),
       };
 
       // Compare id sets for the same query across all ORMs
