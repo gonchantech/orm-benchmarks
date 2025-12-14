@@ -9,12 +9,12 @@ function extractIds(data: any, collectedIds: Set<any> = new Set()): Set<any> {
     for (const item of data) {
       extractIds(item, collectedIds);
     }
-  } else if (typeof data === 'object') {
-    if ('id' in data) {
+  } else if (typeof data === "object") {
+    if ("id" in data) {
       collectedIds.add(data.id);
     }
     for (const key in data) {
-      if (typeof data[key] === 'object') {
+      if (typeof data[key] === "object") {
         extractIds(data[key], collectedIds);
       }
     }
@@ -26,27 +26,31 @@ function extractIds(data: any, collectedIds: Set<any> = new Set()): Set<any> {
 function setsAreEqual(setA: Set<any>, setB: Set<any>): boolean {
   if (setA.size !== setB.size) return false;
   let isEqual = true;
-  setA.forEach(item => {
+  setA.forEach((item) => {
     if (!setB.has(item)) isEqual = false;
   });
   return isEqual;
 }
 
-
 export function compareResults(results: {
-  prismaResults: MultipleBenchmarkRunResults,
-  drizzleResults: MultipleBenchmarkRunResults,
+  prismaResults: MultipleBenchmarkRunResults;
+  drizzleResults: MultipleBenchmarkRunResults;
   typeormResults: MultipleBenchmarkRunResults;
+  kyselyResults: MultipleBenchmarkRunResults;
 }) {
-
-  const orms: ORM[] = ['prisma', 'drizzle', 'typeorm'];
-  const { prismaResults, typeormResults, drizzleResults } = results;
+  const orms: ORM[] = ["prisma", "drizzle", "typeorm", "kysely"];
+  const { prismaResults, typeormResults, drizzleResults, kyselyResults } =
+    results;
 
   // Assuming each ORM has the same set of queries in the same order
   const numberOfQueries = prismaResults[0].length;
   console.log(`no of queries`, numberOfQueries);
 
-  for (let iterationIndex = 0; iterationIndex < prismaResults.length; iterationIndex++) {
+  for (
+    let iterationIndex = 0;
+    iterationIndex < prismaResults.length;
+    iterationIndex++
+  ) {
     const queriesInRun: QueryResult[] = prismaResults[iterationIndex];
 
     queriesInRun.forEach((queryResult, queryIndex) => {
@@ -60,23 +64,28 @@ export function compareResults(results: {
         prisma: extractIds(prismaResults[iterationIndex][queryIndex].data),
         drizzle: extractIds(drizzleResults[iterationIndex][queryIndex].data),
         typeorm: extractIds(typeormResults[iterationIndex][queryIndex].data),
+        kysely: extractIds(kyselyResults[iterationIndex][queryIndex].data),
+        "kysely-additional": new Set<number>(),
       };
 
       // Compare id sets for the same query across all ORMs
       const firstIdSet = idSets.prisma;
-      const isDataConsistent = orms.every(orm => {
+      const isDataConsistent = orms.every((orm) => {
         if (orm === "prisma") return true; // Skip comparing the first set with itself
         return setsAreEqual(firstIdSet, idSets[orm]);
       });
 
       if (!isDataConsistent) {
-        console.log(`Data is DIFFERENT for query "${query}" in run ${iterationIndex + 1}:`);
-        orms.forEach(orm => {
+        console.log(
+          `Data is DIFFERENT for query "${query}" in run ${iterationIndex + 1}:`
+        );
+        orms.forEach((orm) => {
           console.log(`- ${orm}:`, Array.from(idSets[orm]));
         });
       } else {
-        console.log(`Data is SAME for query "${query}" in run ${iterationIndex + 1}:`);
-
+        console.log(
+          `Data is SAME for query "${query}" in run ${iterationIndex + 1}:`
+        );
       }
     });
   }

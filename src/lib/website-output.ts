@@ -3,6 +3,7 @@ import * as path from "path";
 import { prismaSnippets } from "../prisma/prisma-snippets";
 import { drizzleSnippets } from "../drizzle/drizzle-snippets";
 import { typeormSnippets } from "../typeorm/typeorm-snippets";
+import { kyselySnippets } from "../kysely/kysely-snippets";
 
 // Use process.cwd() - more stable across OS and runtimes
 const projectRoot = process.cwd();
@@ -38,12 +39,19 @@ function generateWebsiteOutput(resultsDirectory: string) {
   const prismaFilePath = path.join(resultsDirectory, "prisma.csv");
   const drizzleFilePath = path.join(resultsDirectory, "drizzle.csv");
   const typeormFilePath = path.join(resultsDirectory, "typeorm.csv");
+  const kyselyFilePath = path.join(resultsDirectory, "kysely.csv");
 
   const prismaCsv = readFileSync(prismaFilePath, "utf8");
   const drizzleCsv = readFileSync(drizzleFilePath, "utf8");
   const typeormCsv = readFileSync(typeormFilePath, "utf8");
+  const kyselyCsv = readFileSync(kyselyFilePath, "utf8");
 
-  const data = convertCsvToDataStructure(prismaCsv, drizzleCsv, typeormCsv);
+  const data = convertCsvToDataStructure(
+    prismaCsv,
+    drizzleCsv,
+    typeormCsv,
+    kyselyCsv
+  );
   console.log(JSON.stringify(data, null, 2));
 }
 
@@ -74,11 +82,13 @@ function getSnippet(
 function convertCsvToDataStructure(
   prismaCsv: string,
   drizzleCsv: string,
-  typeormCsv: string
+  typeormCsv: string,
+  kyselyCsv: string
 ) {
   const prismaData = parseCsvToArray(prismaCsv);
   const drizzleData = parseCsvToArray(drizzleCsv);
   const typeormData = parseCsvToArray(typeormCsv);
+  const kyselyData = parseCsvToArray(kyselyCsv);
 
   // Read the source files
   const prismaSource = readFileSync(
@@ -91,6 +101,10 @@ function convertCsvToDataStructure(
   );
   const typeormSource = readFileSync(
     path.join(srcDir, "typeorm/typeorm-pg.ts"),
+    "utf8"
+  );
+  const kyselySource = readFileSync(
+    path.join(srcDir, "kysely/kysely-pg.ts"),
     "utf8"
   );
 
@@ -141,6 +155,15 @@ function convertCsvToDataStructure(
         typeormSnippets,
         typeormSource,
         "typeorm"
+      ),
+    },
+    kysely: {
+      queries: createQueriesObject(
+        kyselyData.headers,
+        kyselyData.data,
+        kyselySnippets,
+        kyselySource,
+        "kysely"
       ),
     },
   };

@@ -1,6 +1,5 @@
 import { extractDatabase } from "./lib/utils";
-import runBenchmarksPg from "./run-benchmarks-pg";
-import runBenchmarksMySQL from "./run-benchmarks-mysql";
+import runAdditinalBenchmarksPg from "./run-additional-benchmarks-pg";
 import dotenv from "dotenv";
 
 const iterations = Number(process.env.ITERATIONS) || 5;
@@ -39,10 +38,14 @@ async function main() {
   );
 
   const database = extractDatabase(databaseUrl);
-
   if (database === "postgresql") {
     console.log(`Running benchmarks on ${databaseUrl}.`);
-    await runBenchmarksPg({ databaseUrl, iterations, size, fakerSeed });
+    await runAdditinalBenchmarksPg({
+      databaseUrl,
+      iterations,
+      size,
+      fakerSeed,
+    });
   } else if (database === "mysql") {
     console.log(`Running benchmarks on ${databaseUrl}.`);
     //await runBenchmarksMySQL({ databaseUrl, iterations, size, fakerSeed });

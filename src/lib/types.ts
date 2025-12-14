@@ -1,4 +1,9 @@
-export type ORM = "prisma" | "drizzle" | "typeorm";
+export type ORM =
+  | "prisma"
+  | "drizzle"
+  | "typeorm"
+  | "kysely"
+  | "kysely-additional";
 export type Database = "postgresql" | "mysql";
 export type QueryResult = {
   query: string;
@@ -18,7 +23,7 @@ export type ConnectionDetails = {
 };
 
 export type BenchmarkOptions = {
-  databaseUrl: string; 
+  databaseUrl: string;
   iterations: number;
   size: number;
   fakerSeed: number;
